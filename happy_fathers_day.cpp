@@ -160,12 +160,34 @@ namespace tmpl_mp {
 
 int main()
 {
+    std::vector<std::function<int(int)>> vFuncs = {
+        via_ctime::GetFathersDay,
+        sakamoto::GetFathersDay,
+        tmpl_mp::GetFathersDay
+    };
+
+
     date today = via_ctime::get_current_date();
     std::cout << "Today is " << static_cast<int>(today.month) + 1 << "/" << today.day << "/" << today.year << std::endl;
 
     int fathers_mday_result = ~0;
 
-    fathers_mday_result = tmpl_mp::GetFathersDay(today.year);
+    // sanity check
+    int year = today.year;
+
+    for (int i = 0; i < 50; i++) {
+        int prev_result = 0;
+        std::cout << year + i << std::endl;
+        for (auto func : vFuncs) {
+            fathers_mday_result = func(year+i);
+            if (prev_result != 0 && prev_result != fathers_mday_result) {
+                assert(prev_result == fathers_mday_result);
+            }
+            prev_result = fathers_mday_result;
+            std::cout << "   June " << fathers_mday_result << std::endl;
+        }
+        std::cout << std::endl;
+    }
 
     if (today.month == static_cast<int>(Month::June) && today.day == fathers_mday_result)
         std::cout << "Happy Father's Day!!!"  << std::endl;
