@@ -67,7 +67,6 @@ constexpr std::array<int, TABLE_SIZE> table = Helper<>::table;
 namespace via_ctime {
     std::string get_day_from_number(uint32_t n)
     {
-        // could turn this into an enum class
         const std::vector<std::string> days = {
             "Sunday",
             "Monday",
@@ -93,7 +92,6 @@ namespace via_ctime {
         return day;
     }
 
-    // function which takes a year and tells the date which father's day falls on
     std::tm get_fathers_day_for_year(int year) {
         // figure out the day of june 1st for that year
         assert(year >= 1900);
@@ -170,29 +168,12 @@ int main()
     date today = via_ctime::get_current_date();
     std::cout << "Today is " << static_cast<int>(today.month) + 1 << "/" << today.day << "/" << today.year << std::endl;
 
-    int fathers_mday_result = ~0;
-
-    // sanity check
-    int year = today.year;
-
-    for (int i = 0; i < 50; i++) {
-        int prev_result = 0;
-        std::cout << year + i << std::endl;
-        for (auto func : vFuncs) {
-            fathers_mday_result = func(year+i);
-            if (prev_result != 0 && prev_result != fathers_mday_result) {
-                assert(prev_result == fathers_mday_result);
-            }
-            prev_result = fathers_mday_result;
-            std::cout << "   June " << fathers_mday_result << std::endl;
-        }
-        std::cout << std::endl;
-    }
+    int fathers_mday_result = vFuncs[2](today.year);
 
     if (today.month == static_cast<int>(Month::June) && today.day == fathers_mday_result)
         std::cout << "Happy Father's Day!!!"  << std::endl;
     else {
-        std::cout << "Not Father's Day yet..." << std::endl;
+        std::cout << "Father's Day is on June " << fathers_mday_result << "this year" << std::endl;
     }
 
     return 0;
