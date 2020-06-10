@@ -91,6 +91,23 @@ namespace via_ctime {
     }
 }
 
+namespace sakamoto {
+    int dayofweek(int d, int m, int y)
+    {
+        static int t[] = { 0, 3, 2, 5, 0, 3,
+                           5, 1, 4, 6, 2, 4 };
+        y -= m < 3;
+        return (y + y / 4 - y / 100 +
+            y / 400 + t[m - 1] + d) % 7;
+    }
+
+    int GetFathersDay(int year)
+    {
+        auto first_of_june_day = dayofweek(1, 6, year);
+        return (first_of_june_day == 0 ? 1 : 7 - first_of_june_day + 1) + 14;
+    }
+}
+
 int main()
 {
     date today = via_ctime::get_current_date();
@@ -98,7 +115,7 @@ int main()
 
     int fathers_mday_result = ~0;
 
-    fathers_mday_result = via_ctime::GetFathersDay(today.year);
+    fathers_mday_result = sakamoto::GetFathersDay(today.year);
 
     if (today.month == static_cast<int>(Month::June) && today.day == fathers_mday_result)
         std::cout << "Happy Father's Day!!!"  << std::endl;
