@@ -3,6 +3,9 @@
 #include <string>
 #include <ctime>
 #include <chrono>
+#include <iomanip>
+#include <functional>
+#include <array>
 #include "assert.h"
 
 enum class Month : int {
@@ -25,6 +28,41 @@ struct date {
     int day;
     int year;
 };
+
+template <int D, int M, int Y>
+struct DayOfTheWeek {
+    constexpr static const int t[] = { 0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4 };
+    static int const y = Y - (M < 3);
+    static int const value = (y + y / 4 - y / 100 + y / 400 + t[M - 1] + D) % 7;
+};
+
+template <int Y>
+struct FathersDayForAGivenYear {
+    static int const day = (DayOfTheWeek<1, 6, Y>::value == 0 ? 1 : 8 - DayOfTheWeek<1, 6, Y>::value) + 14;
+};
+
+
+//constexpr int TABLE_SIZE = 10;
+constexpr int TABLE_SIZE = 50;
+
+/**
+ * Variadic template for a recursive helper struct.
+ */
+template<int INDEX = 0, int ...D>
+//struct Helper : Helper<INDEX + 1, D..., INDEX * INDEX> { };
+struct Helper : Helper<INDEX + 1, D..., FathersDayForAGivenYear<INDEX + 2020>::day > { };
+
+/**
+ * Specialization of the template to end the recursion when the table size reaches TABLE_SIZE.
+ */
+template<int ...D>
+struct Helper<TABLE_SIZE, D...> {
+    static constexpr std::array<int, TABLE_SIZE> table = { D... };
+};
+
+constexpr std::array<int, TABLE_SIZE> table = Helper<>::table;
+
+
 
 namespace via_ctime {
     std::string get_day_from_number(uint32_t n)
@@ -105,6 +143,21 @@ namespace sakamoto {
     }
 }
 
+namespace tmpl_mp {
+    int GetFathersDay(int year) {
+        // year must be 2020 to 2069, if not... we didn't precalculate it
+        if (year >= 2020 && year <= 2069) {
+            size_t index = year - 2020;
+            assert(index < table.size());
+            if (index < table.size()) {
+                return table[index];
+            }
+        }
+        return ~0;
+    }
+}
+
+
 int main()
 {
     date today = via_ctime::get_current_date();
@@ -112,11 +165,13 @@ int main()
 
     int fathers_mday_result = ~0;
 
-    fathers_mday_result = sakamoto::GetFathersDay(today.year);
+    fathers_mday_result = tmpl_mp::GetFathersDay(today.year);
 
     if (today.month == static_cast<int>(Month::June) && today.day == fathers_mday_result)
         std::cout << "Happy Father's Day!!!"  << std::endl;
     else {
         std::cout << "Not Father's Day yet..." << std::endl;
     }
+
+    return 0;
 }
