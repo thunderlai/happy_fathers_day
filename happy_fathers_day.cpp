@@ -173,7 +173,7 @@ int main()
     if (today.month == static_cast<int>(Month::June) && today.day == fathers_mday_result)
         std::cout << "Happy Father's Day!!!"  << std::endl;
     else {
-        std::cout << "Father's Day is on June " << fathers_mday_result << "this year" << std::endl;
+        std::cout << "Father's Day is on June " << fathers_mday_result << " this year" << std::endl;
     }
 
     return 0;
